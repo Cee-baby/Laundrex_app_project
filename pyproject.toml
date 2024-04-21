@@ -1,0 +1,29 @@
+[tool.poetry]
+name = "fastapi-auth"
+version = "0.1.0"
+description = ""
+authors = ["kosi"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+fastapi = "^0.110.1"
+uvicorn = "^0.29.0"
+pytest = "^8.1.1"
+sqlmodel = "^0.0.16"
+pydantic = "^2.7.0"
+pydantic-settings = "^2.2.1"
+python-jose = "^3.3.0"
+fastapi-mail = "^1.4.1"
+passlib = "^1.7.4"
+alembic = "^1.13.1"
+pydantic-extra-types = "^2.6.0"
+phonenumbers = "^8.13.35"
+emails = "^0.6"
+python-multipart = "^0.0.9"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
