@@ -54,7 +54,7 @@ async def register(user: UserCreate, db: Annotated[Session, Depends(get_db)]):
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
-    return user
+    return JSONResponse(status_code=200, content={"message": "User registered successfully"})
 
 
 @router.post("/login")

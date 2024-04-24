@@ -1,18 +1,32 @@
-from sqlmodel import SQLModel, Field
+from typing import List
+from pydantic import BaseModel,Field
 
-class Bookings(SQLModel, table=True):
+class Cloth(BaseModel):
+    cloth_id: str
+    quantity: int
+
+class Bookings(BaseModel):
     id:int = Field(default= None, primary_key= True)
-    customer_name: str
-    pickup_date: str
-    delivery_date: str
-    gender:str
-    status:str= Field(description=["pending","completed","cancelled"])
-    total_amount: float
+    
 
-class Item(SQLModel):
-    name: str
-    description: str
-    price: float
-    quantity:int
+class BookingsCreate( BaseModel):
+    customer_name: str = Field(...)
+    pickup_date: str = Field(...)
+    delivery_date: str = Field(...)
+    gender:str = Field(...)
+    status:str= Field(description="")
+    quantity:int 
+    price:float
     instruction:str
+    total_amount: int=Field(...,description="Total amount",ge= 0)
+    cloth:Cloth
+    bookings:Bookings
+    
+
+# class Item(BaseModel):
+#     name: str
+#     description: str
+#     price: float
+#     quantity:int
+#     instruction:str
 

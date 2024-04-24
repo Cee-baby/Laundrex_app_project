@@ -21,8 +21,8 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         env_file=".env", env_ignore_empty=True, extra="ignore"
     )
-    PROJECT_NAME:str="Security FastApi"
-    FRONTEND_URL:AnyUrl="http://localhost:9000/api/v1"
+    PROJECT_NAME:str="laundrex"
+    FRONTEND_URL:AnyUrl="http://localhost:9001/api/v1"
     API_V1_STR: str = "/api/v1"
     SECRET_KEY: str = secrets.token_urlsafe(32)
     # 60 minutes * 24 hours * 8 days = 8 days
@@ -37,15 +37,15 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     EMAIL_RESET_PASSWORD_EXPIRE_MINUTES: int = 10
     EMAIL_VERIFY_EMAIL_EXPIRE_MINUTES: int = 60 * 24 * 8
-    EMAILS_FROM_NAME: str = "Security FastAPI"
-    EMAILS_FROM_EMAIL: str = ""
+    EMAILS_FROM_NAME: str = "laundrex"
+    EMAILS_FROM_EMAIL: str = "noreply@laundrex.com.ng"
     
     SMTP_TLS: bool = True
     SMTP_SSL: bool = False
-    SMTP_PORT: int = 25 or 465 or 587 or 2525
-    SMTP_HOST: str = "sandbox.smtp.mailtrap.io"
-    SMTP_USER: str = "6f34302cba049b"
-    SMTP_PASSWORD: str = "b99c9ce5f5369b"   
+    SMTP_PORT: int = 465 
+    SMTP_HOST: str = "smtp.zeptomail.com"
+    SMTP_USER: str = "emailapikey"
+    SMTP_PASSWORD: str = "wSsVR613/EL3Dql7njL8Iu44y1lQVFnzEE180FOiv3P7Fv/FpcdtkkfNBFLxG/RNR2ZtQjIXoegokBwF1GZYh98lmwwHACiF9mqRe1U4J3x17qnvhDzNWW5bkRWLLYIAww1pnGRiEsgl+g=="  
 
 
 
