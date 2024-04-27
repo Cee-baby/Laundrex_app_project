@@ -22,7 +22,7 @@ class Settings(BaseSettings):
         env_file=".env", env_ignore_empty=True, extra="ignore"
     )
     PROJECT_NAME:str="laundrex"
-    FRONTEND_URL:AnyUrl="http://localhost:9001/api/v1"
+    FRONTEND_URL:AnyUrl="https://Laundrex.com.ng"
     API_V1_STR: str = "/api/v1"
     SECRET_KEY: str = secrets.token_urlsafe(32)
     # 60 minutes * 24 hours * 8 days = 8 days
@@ -42,11 +42,10 @@ class Settings(BaseSettings):
     
     SMTP_TLS: bool = True
     SMTP_SSL: bool = False
-    SMTP_PORT: int = 465 
+    SMTP_PORT: int = 587 
     SMTP_HOST: str = "smtp.zeptomail.com"
     SMTP_USER: str = "emailapikey"
-    SMTP_PASSWORD: str = "wSsVR613/EL3Dql7njL8Iu44y1lQVFnzEE180FOiv3P7Fv/FpcdtkkfNBFLxG/RNR2ZtQjIXoegokBwF1GZYh98lmwwHACiF9mqRe1U4J3x17qnvhDzNWW5bkRWLLYIAww1pnGRiEsgl+g=="  
-
+    SMTP_PASSWORD: str = "wSsVR613/EL3Dql7njL8Iu44y1lQVFnzEE180FOiv3P7Fv/FpcdtkkfNBFLxG/RNR2ZtQjIXoegokBwF1GZYh98lmwwHACiF9mqRe1U4J3x17qnvhDzNWW5bkRWLLYIAww1pnGRiEsgl+g=="
 
 
 

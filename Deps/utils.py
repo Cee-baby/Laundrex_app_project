@@ -167,24 +167,24 @@ def generate_reset_password_email(email_to: str, email: str, token: str):
     return EmailData(html_content=html_content, subject=subject)
 
 
-def send_mail(email_to: str, subject: str, html_content: str):
-    message = emails.Message(
-        subject=subject, html=html_content, mail_from=settings.EMAILS_FROM_NAME
-    )
-    smtp_options = {
-        "host": settings.SMTP_HOST,
-        "port": settings.SMTP_PORT,
-        "user": settings.SMTP_USER,
-        "password": settings.SMTP_PASSWORD,
-    }
-    if settings.SMTP_TLS:
-        smtp_options["tls"] = True
-    elif settings.SMTP_SSL:
-        smtp_options["ssl"] = True
-    response = message.send(to=email_to, smtp=smtp_options)
+# def send_mail(Data_to: str, subject: str, html_content: str):
+#     message = emails.Message(
+#         subject=subject, html=html_content, mail_from=settings.EMAILS_FROM_NAME
+#     )
+#     smtp_options = {
+#         "host": settings.SMTP_HOST,
+#         "port": settings.SMTP_PORT,
+#         "user": settings.SMTP_USER,
+#         "password": settings.SMTP_PASSWORD,
+#     }
+#     if settings.SMTP_TLS:
+#         smtp_options["tls"] = True
+#     elif settings.SMTP_SSL:
+#         smtp_options["ssl"] = True
+#     response = message.send(to=email_to, smtp=smtp_options)
 
 def send_email(email_to: str, subject: str, html_content: str):
-    port = 465
+    port = settings.SMTP_PORT
     smtp_server = "smtp.zeptomail.com"
     username="emailapikey"
     password = "wSsVR613/EL3Dql7njL8Iu44y1lQVFnzEE180FOiv3P7Fv/FpcdtkkfNBFLxG/RNR2ZtQjIXoegokBwF1GZYh98lmwwHACiF9mqRe1U4J3x17qnvhDzNWW5bkRWLLYIAww1pnGRiEsgl+g=="
@@ -193,7 +193,8 @@ def send_email(email_to: str, subject: str, html_content: str):
     msg['Subject'] = subject
     msg['From'] = "noreply@laundrex.com.ng"
     msg['To'] = email_to
-    msg.add_alternative(message)
+    msg.add_alternative(message, subtype="html")
+    print(port, smtp_server, username, password)
     try:
         if port == 465:
             context = ssl.create_default_context()
@@ -213,16 +214,19 @@ def send_email(email_to: str, subject: str, html_content: str):
         print (e)
 
 
-async def verify_transactions(ref_id:str):
-    url_path = f"https://api.paystack.co/transaction/verify/{ref_id}"
-    headers = {
-        "Authorization": f"Bearer {PAYSTACK_SECRET_KEY}",
-        "Content-Type": "application/json",
-    }
-    response = requests.get(url_path, headers=headers)
+async def verify_payment(ref_id:str):
+    paystack_url = settings.PAYMENT_URL
+    url_path = paystack_url + f"transaction/verify{ref_id}"
+    headers = {"Authorization": f"Bearer {settings.PAYSTACK_SECRET_KEY}","Content-Type": "application/json",
+}
+    response = requests.get(url_path,headers=headers)
     if response.status_code == 200:
         response_data = response.json()
         return response_data['status'], response_data['data']
-    
     response_data = response.json()
     return response_data['status'], response_data['data']
+
+
+    
+    
+    

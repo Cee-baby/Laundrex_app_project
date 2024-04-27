@@ -5,12 +5,13 @@ from Deps.deps import get_db,get_current_user
 from Models.user_bookings import (
     Bookings,
     BookingsCreate
+    
 )
 from Models.user_models import User
 from Routes import crud
 from datetime import timedelta
-from typing import Annotated
-
+from typing import Annotated, List
+from fastapi.encoders import jsonable_encoder
 
 booking_router = APIRouter(tags=["Bookings"])
 
@@ -48,9 +49,8 @@ async def get_available_cloths(category: Annotated[str, Query(description="choos
     elif category == "others":
         return cloth_types["others"]
 
-@booking_router.post("/book-cloth/")
-# async def book_cloth(current_user:Annotated[Session,Depends(get_current_user)]):
-async def book_cloth(booking:BookingsCreate,current_user: Annotated[User, Depends(get_current_user)], db: Annotated[Session,Depends(get_db)]):
+@booking_router.post("/bookings/booking")
+async def Book_Laundry(booking:BookingsCreate,current_user: Annotated[User, Depends(get_current_user)], db: Annotated[Session,Depends(get_db)]):
     booking_details = Bookings(**booking.dict())
     # booking_data = {
     #     "user_id": current_user.id,
@@ -68,30 +68,18 @@ async def book_cloth(booking:BookingsCreate,current_user: Annotated[User, Depend
     # },
     if not current_user:
         raise HTTPException(status_code=404,detail="User not found")
-    # booking=Bookings(current_user=booking)
-    # session.add(booking)
-    # session.commit()
 
 
     return{"message":f"sucessfully booked ,{booking_details}"}
 
-@booking_router.get("/status/{user_id}")
+@booking_router.get("/booking/status/{user_id}" ,  response_model=List[Bookings])
 async def get_booking_status(user_id: int, session: Session = Depends(get_db)):
     user = session.exec(Bookings).filter(Bookings.user_id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     
-    # user_status = session.exec(Bookings).filter(Bookings.user_id == user_id).first()
-    # status = {"pending": [], "cancelled": [], "completed": []}
-
-    # for booking in user_status:
-    #     status = booking.status
-    #     if status in status_choices:
-    #         status_choices[status].append({"booking_id": booking.id})
-
-    # return {"user": user.fullname, "status_choices": status_choices}
-
-    return {"user": user.fullname, "status": user.status}
+    user_bookings =jsonable_encoder(user)
+    return user_bookings
     
 
 
@@ -116,8 +104,7 @@ async def get_booking_history(current_user: Annotated[User, Depends(get_current_
         raise HTTPException(status_code=404, detail="User details not found")
 
     user = current_user
-    print(user.id)
-    booking_history = get_booking_history_from_db(db, user_id)
+    booking_history = (db, user.id)
 
     if booking_history is None:
         return JSONResponse(status_code=404, content={"message": "Booking history not found for this user"})
