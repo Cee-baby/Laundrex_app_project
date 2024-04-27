@@ -1,32 +1,36 @@
+from sqlmodel import SQLModel, Field, Column, ARRAY, JSON
 from typing import List
-from pydantic import BaseModel,Field
 
-class Cloth(BaseModel):
-    cloth_id: str
+
+class Cloth(SQLModel):
+    cloth_name: str
     quantity: int
+    category: str=Field(...,description="Men,Women,Others")
 
-class Bookings(BaseModel):
-    id:int = Field(default= None, primary_key= True)
-    
 
-class BookingsCreate( BaseModel):
-    customer_name: str = Field(...)
+
+
+class BookingsCreate(SQLModel):
+    user_name: str = Field(...,)
+    phonenumber:str
     pickup_date: str = Field(...)
-    delivery_date: str = Field(...)
-    gender:str = Field(...)
-    status:str= Field(description="")
-    quantity:int 
-    price:float
-    instruction:str
-    total_amount: int=Field(...,description="Total amount",ge= 0)
-    cloth:Cloth
-    bookings:Bookings
+    address: str=Field(...,description="123,Example street,Example city,Example Country")
+    instruction:str = Field()
+    clothes: List[Cloth] = Field(sa_column=Column(JSON))
+    booking_fulfilled: bool = Field(default=False)
+    total_price: float=Field(...,description="Total amount",ge= 0)
+    total_quantity:int
+    
     
 
-# class Item(BaseModel):
-#     name: str
-#     description: str
-#     price: float
-#     quantity:int
-#     instruction:str
+    class Config:
+        arbitrary_types_allowed = True
+
+
+class Bookings(BookingsCreate, table=True):
+    id:int = Field(default= None, primary_key= True)
+    user_id: int = Field(..., description="User id")
+
+    
+
 

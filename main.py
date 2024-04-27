@@ -17,6 +17,7 @@ app = FastAPI(title="Laundrex✨👗🗑")
 app.include_router(router, prefix=settings.API_V1_STR)
 app.include_router(booking_router, prefix=settings.API_V1_STR)
 app.include_router(news_router,prefix=settings.API_V1_STR)
+# app.include_router(payment_router,prefix=settings.API_V1_STR)
 
 @app.on_event("startup")
 def on_startup():

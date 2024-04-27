@@ -60,6 +60,7 @@ from pathlib import Path
 import emails
 import smtplib, ssl
 from email.message import EmailMessage
+import requests
 
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -95,10 +96,10 @@ def verify_token_access(token: str):
             token, settings.SECRET_KEY, algorithms=settings.ALGORITHM
         )  # noqa
         token_data = TokenData(**payload)
-    except (JWTError, ValidationError):
+    except (JWTError, ValidationError) as e:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Could not validate credentials",
+            detail=f"Could not validate credentials {e}",
         )
     return token_data
 
@@ -191,8 +192,8 @@ def send_email(email_to: str, subject: str, html_content: str):
     msg = EmailMessage()
     msg['Subject'] = subject
     msg['From'] = "noreply@laundrex.com.ng"
-    msg['email_to'] = email_to
-    msg.add_alternative(message, subtype="html")
+    msg['To'] = email_to
+    msg.add_alternative(message)
     try:
         if port == 465:
             context = ssl.create_default_context()
@@ -210,3 +211,18 @@ def send_email(email_to: str, subject: str, html_content: str):
         print ("successfully sent")
     except Exception as e:
         print (e)
+
+
+async def verify_transactions(ref_id:str):
+    url_path = f"https://api.paystack.co/transaction/verify/{ref_id}"
+    headers = {
+        "Authorization": f"Bearer {PAYSTACK_SECRET_KEY}",
+        "Content-Type": "application/json",
+    }
+    response = requests.get(url_path, headers=headers)
+    if response.status_code == 200:
+        response_data = response.json()
+        return response_data['status'], response_data['data']
+    
+    response_data = response.json()
+    return response_data['status'], response_data['data']

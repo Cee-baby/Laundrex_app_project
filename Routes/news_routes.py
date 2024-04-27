@@ -39,16 +39,16 @@ async def get_news(news_id:int,session:Session=Depends(get_db)):
 
     return response
 
-@news_router.put("/news/{news_id}")
-def update_news(news_id: int, news: News, session: Session = Depends(get_db)):
-    db_news = session.get(News, news_id)
-    if not db_news:
-        raise HTTPException(status_code=404, detail="News not found")
-    db_news.title = news.title
-    db_news.description = news.description
-    session.add(db_news)
-    session.commit()
-    return db_news
+# @news_router.put("/news/{news_id}")
+# def update_news(news_id: int, news: News, session: Session = Depends(get_db)):
+#     db_news = session.get(News, news_id)
+#     if not db_news:
+#         raise HTTPException(status_code=404, detail="News not found")
+#     db_news.title = news.title
+#     db_news.description = news.description
+#     session.add(db_news)
+#     session.commit()
+#     return db_news
         
 
 
@@ -60,6 +60,22 @@ def delete_news(news_id: int, session: Session = Depends(get_db)):
     session.delete(news)
     session.commit()
     return news
-    
 
+
+@news_router.get("/all_news/{news_id}")
+async def get_all_news(news_id:int, session:Session=Depends(get_db)):
+    news=session.get(News,news_id)
+    if not news:
+        raise  HTTPException(status_code=404,detail="News not found")
+    news= session.exec(select(News).filter(News.id == news_id)).all()
+    return news
+
+# @news_router.get("/news{news_id}")
+# def get_news_by_id(news_id:int,session:Session = Depends(get_db)):
+#     news = session.get(News,news_id)
+#     if not news_id:
+#         raise HTTPException(status_code=404, detail="News not found")
+#     session.get(news)
+#     session.commit()
+#     return news
 

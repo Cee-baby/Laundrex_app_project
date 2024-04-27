@@ -22,7 +22,7 @@ class UserCreate(SQLModel):
     full_name: str = Field(default="",min_length=3,max_length=50,description="full_name of the User")
     email: str=Field(unique=True,index=True,description="Email of the User")
     password: str = Field(min_length=8, max_length=100, description="Password of the User",title="Password") 
-    phone: PhoneNumber = Field(description="Phone number of the passenger", title="Phone Number", schema_extra={})
+    # phone: PhoneNumber = Field(description="Phone number of the passenger", title="Phone Number", schema_extra={})
 
    
     
@@ -32,7 +32,8 @@ class User(UserCreate,table=True):
     created: datetime = Field(default_factory=datetime_now_sec)
     modified: datetime = Field(default_factory=datetime_now_sec)
     is_active: bool = Field(default=False)
-    is_superuser: bool = Field(default=False,description="Is the user active",title="Is Active")
+    is_superuser: bool = Field(default=False,description="Is for admin users",title="Is Super User")
+    
 
 
 class Token(SQLModel):

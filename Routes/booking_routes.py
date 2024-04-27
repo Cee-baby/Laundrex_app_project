@@ -1,16 +1,16 @@
 from fastapi import APIRouter,Depends,HTTPException, Query
 from fastapi.responses import JSONResponse
 from sqlmodel import Session, select
-from Deps.deps import get_db
+from Deps.deps import get_db,get_current_user
 from Models.user_bookings import (
     Bookings,
     BookingsCreate
 )
 from Models.user_models import User
-
 from Routes import crud
 from datetime import timedelta
 from typing import Annotated
+
 
 booking_router = APIRouter(tags=["Bookings"])
 
@@ -37,7 +37,7 @@ cloth_types = {
             
         },
     }
-@booking_router.get("get-cloths")
+@booking_router.get("/get-cloths")
 async def get_available_cloths(category: Annotated[str, Query(description="choose the category of cloths interested in.")]):
     if category not in ["men", "women", "others"]:
         raise HTTPException(status_code=404, detail="Wrong Category Provided, Available Options are [men, women, others]")
@@ -48,28 +48,87 @@ async def get_available_cloths(category: Annotated[str, Query(description="choos
     elif category == "others":
         return cloth_types["others"]
 
-@booking_router.post("/book_cloth/")
-async def book_cloth(booking:Bookings, session:Session=Depends(get_db)):
-    user = session.get(User,booking)
-    if not user:
+@booking_router.post("/book-cloth/")
+# async def book_cloth(current_user:Annotated[Session,Depends(get_current_user)]):
+async def book_cloth(booking:BookingsCreate,current_user: Annotated[User, Depends(get_current_user)], db: Annotated[Session,Depends(get_db)]):
+    booking_details = Bookings(**booking.dict())
+    # booking_data = {
+    #     "user_id": current_user.id,
+    #     "full_name": current_user.full_name,
+    #     "email": current_user.email,
+    #     "is_active": current_user.is_active,
+    #     "phonenumber":current_user.phonenumber,
+    #     "pickup_date":current_user.pickup_date,
+    #     "category":current_user.category,
+    #     "price":current_user.price,
+    #     "total_quantity":current_user.total_quantity,
+    #     "total_price":current_user.total_price,
+    #     "address":current_user.address,
+    #     "status":current_user.status,
+    # },
+    if not current_user:
         raise HTTPException(status_code=404,detail="User not found")
-    booking=Bookings(booking=booking)
-    session.add(booking)
-    session.commit()
+    # booking=Bookings(current_user=booking)
+    # session.add(booking)
+    # session.commit()
 
 
-    return{"message":f"sucessfully booked {cloth_types['category']} for {user.name}"}
+    return{"message":f"sucessfully booked ,{booking_details}"}
 
-@booking_router.get("/user-bookings/{user_id}")
-async def get_user_bookings(user_id:int, session:Session=Depends(get_db)):
-    user=session.get(User,user_id)
+@booking_router.get("/status/{user_id}")
+async def get_booking_status(user_id: int, session: Session = Depends(get_db)):
+    user = session.exec(Bookings).filter(Bookings.user_id == user_id).first()
     if not user:
-        raise  HTTPException(status_code=404,detail="User not found")
-    bookings= session.exec(select(Bookings).filter(Bookings.user_id == user_id)).all()
-    categorized_bookings ={"men":[],"women":[],"others":[]}
-    for booking in bookings:
-        cloth_type =cloth_types.get(booking)
-        if cloth_type:
-            category = cloth_type["category"]
-            categorized_bookings[category].append({"cloth_type":cloth_type["name"]})
-    return {"user":user.name, "bookings":categorized_bookings}    
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # user_status = session.exec(Bookings).filter(Bookings.user_id == user_id).first()
+    # status = {"pending": [], "cancelled": [], "completed": []}
+
+    # for booking in user_status:
+    #     status = booking.status
+    #     if status in status_choices:
+    #         status_choices[status].append({"booking_id": booking.id})
+
+    # return {"user": user.fullname, "status_choices": status_choices}
+
+    return {"user": user.fullname, "status": user.status}
+    
+
+
+# @booking_router.get("/user-bookings/{user_id}")
+# async def get_user_bookings(user_id:int, session:Session=Depends(get_db)):
+#     user=session.get(User,user_id)
+#     if not user:
+#         raise  HTTPException(status_code=404,detail="User not found")
+#     bookings= session.exec(select(Bookings).filter(Bookings.user_id == user_id)).all()
+#     categorized_bookings ={"men":[],"women":[],"others":[]}
+#     for booking in bookings:
+#         cloth_type =cloth_types.get(booking)
+#         if cloth_type:
+#             category = cloth_type["category"]
+#             categorized_bookings[category].append({"cloth_type":cloth_type["name"]})
+#     return {"user":user.name, "bookings":categorized_bookings}  
+
+
+@booking_router.get("/current_user/")
+async def get_booking_history(current_user: Annotated[User, Depends(get_current_user)], db: Annotated[Session,Depends(get_db)]):
+    if not current_user:
+        raise HTTPException(status_code=404, detail="User details not found")
+
+    user = current_user
+    print(user.id)
+    booking_history = get_booking_history_from_db(db, user_id)
+
+    if booking_history is None:
+        return JSONResponse(status_code=404, content={"message": "Booking history not found for this user"})
+
+    return JSONResponse(status_code=200, content={"user_details": {
+        "id": current_user.id,
+        "fullname": current_user.full_name,
+        "email": current_user.email,
+        "is_active": current_user.is_active,
+        "is_fulfilled": current_user.is_fulfilled
+    }, 
+    })
+    
+

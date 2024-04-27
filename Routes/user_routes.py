@@ -36,25 +36,31 @@ async def register(user: UserCreate, db: Annotated[Session, Depends(get_db)]):
     
     # hash the password
     user.password = get_password_hash(user.password)
+    print(user.password)
     new_user = User(**user.dict())
+    print(new_user)
 
     # generate token
     email_verification_token = create_token(subject=user.email, type_ops="verify")  # noqa
 
+    print(email_verification_token)
     # send email verification to user
     email_data = generate_verification_email(
         email_to=new_user.email, email=new_user.email, token=email_verification_token # noqa
     )
-    send_email(
+    print(email_data)
+
+    data = send_email(
         email_to=new_user.email,
         subject=email_data.subject,
-        html_content=email_data.html_content,
+        html_content=email_data.html_content
     )
+    print(data)
 
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
-    return JSONResponse(status_code=200, content={"message": "User registered successfully"})
+    return JSONResponse(status_code=200, content={"message": "User registered successfully", "data": data})
 
 
 @router.post("/login")
@@ -62,6 +68,7 @@ async def login(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     db: Annotated[Session, Depends(get_db)],
 ):
+    print(form_data.username)
     # get user by email
     user = crud.authenticate(
         session=db, email=form_data.username, password=form_data.password
@@ -70,7 +77,7 @@ async def login(
         raise HTTPException(status_code=400, detail="Incorrect email or password")
     
     if not user.is_active:
-        raise HTTPException(status_code=400, detail="Inactive user")
+        raise HTTPException(status_code=400, detail="email not verified")
 
     return Token(access_token=create_token(subject=user.id, type_ops="access"))
 
@@ -148,9 +155,19 @@ def reset_password(
 
 @router.post("/login/get-current-user")
 def get_logged_user(
-    current_user: Annotated[UserCreate, Depends(get_current_user)]
-) -> UserOutput | None:
+    current_user:  Annotated[Session,Depends (get_current_user)]
+) -> User | None:
     """
     Test access token
     """
-    return current_user
+    data = {
+        "id": current_user.id,
+        "username": current_user.full_name,
+        "email": current_user.email,
+        "is_active": current_user.is_active,
+        "is_superuser": current_user.is_superuser,
+        
+    }
+    return JSONResponse(status_code=201, content=data)
+
+    # return current_user

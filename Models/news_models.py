@@ -13,6 +13,6 @@ class NewsCreate(SQLModel):
     image:str
 
 class News(NewsCreate,table= True):
-    id:int=Field(default=None,primary_key=True)
+    id:int=Field(default=None,primary_key=True,unique=True)
 
 
